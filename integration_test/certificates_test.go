@@ -155,6 +155,18 @@ var _ = Describe("Certificates Test", func() {
 				session := runCommand("get", "-n", certificateId)
 				Eventually(session).Should(Exit(0))
 			})
+
+			By("regenerating the certificate", func() {
+				session := runCommand("regenerate", "-n", certificateId)
+				Eventually(session).Should(Exit(0))
+				stdOut := string(session.Out.Contents())
+				cert := CertFromPem(stdOut)
+				Expect(cert.Subject.CommonName).To(Equal(certificateId))
+				Expect(cert.Issuer.CommonName).To(Equal(certificateAuthorityId))
+				Expect(cert.KeyUsage).To(Equal(x509.KeyUsageDigitalSignature))
+				Expect(cert.ExtKeyUsage).To(Equal([]x509.ExtKeyUsage{x509.ExtKeyUsageCodeSigning}))
+				Expect(cert.IsCA).To(Equal(false))
+			})
 		})
 
 		It("should be able to generate a self-signed certificate", func() {
@@ -182,6 +194,19 @@ var _ = Describe("Certificates Test", func() {
 				Eventually(session).Should(Exit(0))
 				Expect(stdOut).ToNot(MatchRegexp(`Ca:`))
 				Expect(stdOut).To(MatchRegexp(`Certificate:\s+-----BEGIN CERTIFICATE-----`))
+			})
+
+			By("regenerating the certificate", func() {
+				session := runCommand("regenerate", "-n", certificateId)
+				Eventually(session).Should(Exit(0))
+
+				stdOut := string(session.Out.Contents())
+				cert := CertFromPem(stdOut)
+				Expect(cert.Subject.CommonName).To(Equal(certificateId))
+				Expect(cert.Issuer.CommonName).To(Equal(certificateId)) // self-signed
+				Expect(cert.KeyUsage).To(Equal(x509.KeyUsageDigitalSignature))
+				Expect(cert.ExtKeyUsage).To(Equal([]x509.ExtKeyUsage{x509.ExtKeyUsageCodeSigning}))
+				Expect(cert.IsCA).To(Equal(false))
 			})
 		})
 
