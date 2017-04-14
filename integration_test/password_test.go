@@ -27,7 +27,7 @@ var _ = Describe("Password test", func() {
 
 	It("should regenerate passwords with similar rules", func() {
 		generatedPasswordId := GenerateUniqueCredentialName()
-
+		firstValue := ""
 		By("first generating a password with no numbers", func() {
 			session := RunCommand("generate", "-n", generatedPasswordId, "-t", "password", "--exclude-number")
 			Eventually(session).Should(Exit(0))
@@ -35,6 +35,7 @@ var _ = Describe("Password test", func() {
 			stdOut := string(session.Out.Contents())
 			Expect(stdOut).To(ContainSubstring(`type: password`))
 			Expect(stdOut).NotTo(MatchRegexp(`value: \S*\d`))
+			firstValue = stdOut
 		})
 
 		By("then regenerating the password and observing it still has no numbers", func() {
@@ -43,6 +44,7 @@ var _ = Describe("Password test", func() {
 
 			stdOut := string(session.Out.Contents())
 			Expect(stdOut).NotTo(MatchRegexp(`value: \S*\d`))
+			Expect(stdOut).NotTo(Equal(firstValue))
 		})
 	})
 })
