@@ -71,6 +71,30 @@ var _ = Describe("mutual TLS authentication", func() {
 		})
 	})
 
+	Describe("with an valid certificate from an expired CA", func() {
+		BeforeEach(func() {
+			config, err = LoadConfig()
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("prevents the client from hitting an authenticated endpoint", func() {
+			postData := map[string]string{
+				"name": "mtlstest",
+				"type": "password",
+			}
+			result, err := mtlsPost(
+				config.ApiUrl+"/api/v1/data",
+				postData,
+				"server_ca_cert.pem",
+				"expiredCA.pem",
+				"expiredCA_key.pem")
+
+			fmt.Print(err)
+			//Expect(err.Error()).To(ContainSubstring("unknown certificate"))
+			Expect(result).To(BeEmpty())
+		})
+	})
+
 	Describe("with a self-signed certificate", func() {
 		BeforeEach(func() {
 			config, err = LoadConfig()

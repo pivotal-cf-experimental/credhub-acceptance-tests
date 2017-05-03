@@ -51,11 +51,16 @@ def generate_bad_certs(ca_cert_path, ca_key_path):
     make_unknown_cert_and_ca()
     generate_cert(ca_cert_path, ca_key_path, "expired", "-1")
 
+def generate_valid_cert_from_expiredCA(ca_cert_path, ca_key_path):
+    generate_cert(ca_cert_path, ca_key_path, "expiredCA", "365")
+
 tool_desc = "TLS certificate generator for CredHub acceptance tests"
 parser = argparse.ArgumentParser(description=tool_desc)
 
 parser.add_argument('-caCert','-c','--c', dest='ca_cert_path', help="Path to PEM encoded CA public cert")
 parser.add_argument('-caKey','-k','--k', dest='ca_key_path', help="Path to PEM encoded CA private key")
+parser.add_argument('-expiredCaCert','-ec','--ec', dest='expired_ca_cert_path', help="Path to expired PEM encoded CA public cert")
+parser.add_argument('-expiredCaKey','-ek','--ek', dest='expired_ca_key_path', help="Path to expired PEM encoded CA private key")
 
 args = parser.parse_args()
 
@@ -66,5 +71,5 @@ if not (args.ca_cert_path and args.ca_key_path):
 setup_cert_dir()
 
 generate_valid_cert(args.ca_cert_path, args.ca_key_path)
-
 generate_bad_certs(args.ca_cert_path, args.ca_key_path)
+generate_valid_cert_from_expiredCA(args.expired_ca_cert_path, args.expired_ca_key_path)
